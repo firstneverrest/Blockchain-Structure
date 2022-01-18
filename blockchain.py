@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import json
+from flask import Flask
 
 class blockchain:
     def __init__(self):
@@ -27,5 +28,29 @@ class blockchain:
         encode_block = json.dumps(block, sort_keys=True).encode()
         return hashlib.sha256(encode_block).hexdigest()
 
-blockchain = blockchain()
-print(blockchain.hash(blockchain.chain[0]))
+    # find nonce that will make the hash start with 4 zeros
+    def proof_of_work(self, previous_nonce):
+        new_nonce = 1
+        check_proof = False # check nonce until it equals to target hash (4 zeros)
+
+        while check_proof is False:
+            hash_operation = hashlib.sha256(str(new_nonce ** 2 - previous_nonce ** 2).encode()).hexdigest()
+            if hash_operation[:4] == '0000':
+                check_proof = True
+            else:
+                new_nonce += 1
+        return new_nonce
+
+# web server
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return '<h1>Hello Blockchain!</h1>'
+
+# run server
+if __name__ == '__main__':
+    app.run()
+
+# blockchain = blockchain()
+# print(blockchain.hash(blockchain.chain[0]))
