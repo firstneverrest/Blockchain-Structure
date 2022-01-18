@@ -1,13 +1,12 @@
 import datetime
 import hashlib
 import json
-from flask import Flask
+from flask import Flask, jsonify
 
 class blockchain:
     def __init__(self):
         self.chain = [] # list of blocks
         self.add_block(nonce=1, previous_hash='0')
-        self.add_block(nonce=3, previous_hash='12')
 
     def add_block(self, nonce, previous_hash):
         block = {
@@ -44,13 +43,36 @@ class blockchain:
 # web server
 app = Flask(__name__)
 
+blockchain = blockchain()
+
 @app.route('/')
 def hello():
-    return '<h1>Hello Blockchain!</h1>'
+    return '<h1>Blockchain server is running</h1>'
+
+@app.route('/get_chain', methods=['GET'])
+def get_chain():
+    response = {
+        'chain': blockchain.chain,
+        'length': len(blockchain.chain)
+    }
+    return jsonify(response), 200
+
+@app.route('/mining', methods=['GET'])
+def mining_block():
+    # get previous nonce
+    previous_block = blockchain.get_previous_block()
+    previous_nonce = previous_block['nonce']
+    # find nonce
+    nonce = blockchain.proof_of_work(previous_nonce)
+    previous_hash = blockchain.hash(previous_block)
+    # add block
+    block = blockchain.add_block(nonce, previous_hash)
+    response = {
+        'message': 'Block added successfully',
+        'block': block
+    }
+    return jsonify(response), 200
 
 # run server
 if __name__ == '__main__':
     app.run()
-
-# blockchain = blockchain()
-# print(blockchain.hash(blockchain.chain[0]))
