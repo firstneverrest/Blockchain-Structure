@@ -6,7 +6,7 @@ from flask import Flask, jsonify
 class blockchain:
     def __init__(self):
         self.chain = [] # list of blocks
-        self.add_block(nonce=1, previous_hash='0')
+        self.add_block(nonce=1, previous_hash='0') # genesis block
 
     def add_block(self, nonce, previous_hash):
         block = {
@@ -40,6 +40,28 @@ class blockchain:
                 new_nonce += 1
         return new_nonce
 
+    # check if every block in the chain is valid
+    def is_chain_valid(self, chain):
+        previous_block = chain[0]
+        block_index = 1
+        while block_index < len(chain):
+            block = chain[block_index]
+
+            # check previous hash (if not equal, it means this block is modified)
+            if block['previous_hash'] != self.hash(previous_block):
+                return False
+
+            # check nonce
+            previous_nonce = previous_block['nonce']
+            nonce = block['nonce']
+            hash_operation = hashlib.sha256(str(nonce ** 2 - previous_nonce ** 2).encode()).hexdigest()
+            if hash_operation[:4] != '0000':
+                return False
+            previous_block = block
+            block_index += 1
+        return True
+
+
 # web server
 app = Flask(__name__)
 
@@ -71,6 +93,15 @@ def mining_block():
         'message': 'Block added successfully',
         'block': block
     }
+    return jsonify(response), 200
+
+@app.route('/is_valid', methods=['GET'])
+def is_valid():
+    is_valid = blockchain.is_chain_valid(blockchain.chain)
+    if is_valid:
+        response = {'message': 'The Blockchain is valid.'}
+    else: 
+        response = {'message': 'The Blockchain is invalid'}
     return jsonify(response), 200
 
 # run server
