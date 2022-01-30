@@ -6,6 +6,7 @@ from flask import Flask, jsonify
 class blockchain:
     def __init__(self):
         self.chain = [] # list of blocks
+        self.transaction = 0
         self.add_block(nonce=1, previous_hash='0') # genesis block
 
     def add_block(self, nonce, previous_hash):
@@ -13,6 +14,7 @@ class blockchain:
             'index': len(self.chain) + 1,
             'timestamp': str(datetime.datetime.now()),
             'nonce': nonce,
+            'data': self.transaction,
             'previous_hash': previous_hash
         }
         self.chain.append(block)
@@ -81,6 +83,8 @@ def get_chain():
 
 @app.route('/mining', methods=['GET'])
 def mining_block():
+    amount = 1_000_000
+    blockchain.transaction = blockchain.transaction + amount
     # get previous nonce
     previous_block = blockchain.get_previous_block()
     previous_nonce = previous_block['nonce']
