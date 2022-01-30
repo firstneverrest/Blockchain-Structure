@@ -1,5 +1,7 @@
 # Blockchain Structure
 
+Visualize each block of blockchain with Python class and Flask web server.
+
 ## Tools
 
 ![image](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=darkgreen)
